@@ -59,6 +59,9 @@ NUMBER_OF_COMPUTE_NODES ||= 1
 NUMBER_OF_STORAGE_NODES ||= 1
 NUMBER_OF_NETWORK_NODES ||= 1
 
+SUBNET ||= "192.168.100"
+DOMAIN ||= "local"
+
 NODE_SETTINGS ||= {
   aio: {
     cpus: 4,
@@ -66,23 +69,28 @@ NODE_SETTINGS ||= {
   },
   operator: {
     cpus: 1,
-    memory: 1024
+    memory: 1024,
+    prefix: 2
   },
   control: {
     cpus: 1,
-    memory: 2048
+    memory: 2048,
+    prefix: 1
   },
   compute: {
     cpus: 1,
-    memory: 1024
+    memory: 1024,
+    prefix: 3
   },
   storage: {
     cpus: 1,
-    memory: 1024
+    memory: 1024,
+    prefix: 4
   },
   network: {
     cpus: 1,
-    memory: 1024
+    memory: 1024,
+    prefix: 5
   }
 }
 
@@ -109,12 +117,7 @@ end
 
 Vagrant.configure(2) do |config|
   config.vm.box = get_default(:base_image)
-
-  # Next to the hostonly NAT-network there is a host-only network with all
-  # nodes attached. Plus, each node receives a 3rd adapter connected to the
-  # outside public network.
-  config.vm.network "private_network", type: "dhcp"
-  config.vm.network "public_network", dev: get_default(:bridge_interface), mode: 'bridge', type: 'bridge'
+  config.ssh.insert_key = false # workaround for https://github.com/mitchellh/vagrant/issues/5048
 
   my_privatekey = File.read(File.join(vagrant_dir, "vagrantkey"))
   my_publickey = File.read(File.join(vagrant_dir, "vagrantkey.pub"))
@@ -135,25 +138,16 @@ Vagrant.configure(2) do |config|
     chown -R vagrant: /home/vagrant/.ssh
   EOS
 
-  config.hostmanager.enabled = true
-  # Make sure hostmanager picks IP address of eth1
-  config.hostmanager.ip_resolver = proc do |vm, resolving_vm|
-    case PROVIDER
-    when "libvirt"
-      if vm.name
-        `virsh -c qemu:///system net-dhcp-leases vagrant-private-dhcp | awk -F'[ /]+' '/#{vm.name} / {print $6}'`.chop
-      end
-    when "virtualbox_ubuntu"
-    when "virtualbox_centos"
-      if vm.id
-        `VBoxManage guestproperty get #{vm.id} "/VirtualBox/GuestInfo/Net/1/V4/IP"`.split()[1]
-      end
-    end
-  end
+  config.landrush.enabled = true
+  config.landrush.tld = "#{DOMAIN}"
 
   # The operator controls the deployment
   config.vm.define "operator" do |admin|
-    admin.vm.hostname = "operator.local"
+    admin.vm.hostname = "operator.#{DOMAIN}"
+    private_ip = "#{SUBNET}.#{get_setting(:operator, :prefix)}"
+    admin.vm.network :private_network, ip: private_ip
+    admin.vm.network "public_network", bridge: get_default(:bridge_interface)
+    admin.landrush.host_ip_address = private_ip
     admin.vm.provision :shell, path: get_default(:provision_script), args: "operator #{MULTINODE ? 'multinode' : 'aio'} #{get_default(:kolla_path)}"
     admin.vm.synced_folder File.join(vagrant_dir, '..', '..'), get_default(:kolla_path), create:"True", type: get_default(:sync_method)
     admin.vm.synced_folder File.join(vagrant_dir, 'storage', 'operator'), "/data/host", create:"True", type: get_default(:sync_method)
@@ -163,7 +157,6 @@ Vagrant.configure(2) do |config|
       vm.memory = MULTINODE ? get_setting(:operator, :memory) : get_setting(:aio, :memory)
       vm.cpus = MULTINODE ? get_setting(:operator, :cpus) : get_setting(:aio, :cpus)
     end
-    admin.hostmanager.aliases = "operator"
   end
 
   if MULTINODE
@@ -171,8 +164,13 @@ Vagrant.configure(2) do |config|
       (1..self.class.const_get("NUMBER_OF_#{node_type.upcase}_NODES")).each do |i|
         hostname = "#{node_type}0#{i}"
         config.vm.define hostname do |node|
-          node.vm.hostname = "#{hostname}.local"
+          node.vm.hostname = "#{hostname}.#{DOMAIN}"
+          private_ip = "#{SUBNET}.#{get_setting(node_type.to_sym, :prefix)}#{i}"
+          node.vm.network :private_network, ip: private_ip
+          node.vm.network "public_network", bridge: get_default(:bridge_interface)
+          node.landrush.host_ip_address = private_ip
           node.vm.provision :shell, path: get_default(:provision_script), args: "#{hostname} multinode #{get_default(:kolla_path)}"
+          node.vm.synced_folder File.join(vagrant_dir, '..', '..'), get_default(:kolla_path), create:"True", type: get_default(:sync_method)
           node.vm.synced_folder File.join(vagrant_dir, 'storage', node_type), "/data/host", create:"True", type: get_default(:sync_method)
           node.vm.synced_folder File.join(vagrant_dir, 'storage', 'shared'), "/data/shared", create:"True", type: get_default(:sync_method)
           node.vm.synced_folder ".", get_default(:vagrant_shared_folder), disabled: true
@@ -180,7 +178,6 @@ Vagrant.configure(2) do |config|
             vm.memory = get_setting(node_type.to_sym, :memory)
             vm.cpus = get_setting(node_type.to_sym, :cpus)
           end
-          node.hostmanager.aliases = hostname
         end
       end
     end
