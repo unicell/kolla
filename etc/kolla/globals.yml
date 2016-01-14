@@ -7,12 +7,15 @@
 ###################
 # Valid options are [ COPY_ONCE, COPY_ALWAYS ]
 #config_strategy: "COPY_ONCE"
+config_strategy: "COPY_ALWAYS"
 
 # Valid options are [ centos, fedora, oraclelinux, ubuntu ]
 #kolla_base_distro: "centos"
+kolla_base_distro: "ubuntu"
 
 # Valid options are [ binary, source ]
 #kolla_install_type: "binary"
+kolla_install_type: "source"
 
 # This should be a VIP, an unused IP on your network that will float between
 # the hosts running keepalived for high-availibility. When running an All-In-One
@@ -37,6 +40,7 @@ kolla_internal_address: "10.10.10.254"
 # docker_namespace: "companyname"
 # docker_registry_username: "sam"
 # docker_registry_password: "correcthorsebatterystaple"
+docker_registry: "operator.local:4000"
 
 
 ####################
@@ -76,9 +80,10 @@ neutron_external_interface: "eth1"
 #nova_console: "novnc"
 
 # OpenStack services can be enabled or disabled with these options
-#enable_cinder: "yes"
+enable_cinder: "yes"
 #enable_heat: "no"
 #enable_magnum: "no"
+enable_ceph: "yes"
 
 
 ###################
