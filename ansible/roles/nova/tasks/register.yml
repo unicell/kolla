@@ -17,7 +17,7 @@
   until: nova_endpoint.stdout.split()[2] == 'SUCCESS'
   retries: 10
   delay: 5
-  run_once: True
+  delegate_to: "{{ groups['nova-api'][0] }}"
 
 
 - name: Creating the Nova project, user, and role
@@ -35,4 +35,4 @@
   until: nova_user.stdout.split()[2] == 'SUCCESS'
   retries: 10
   delay: 5
-  run_once: True
+  delegate_to: "{{ groups['nova-api'][0] }}"

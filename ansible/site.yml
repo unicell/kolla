@@ -94,8 +94,8 @@
 
 - hosts:
     - compute
-    - neutron-agents
     - neutron-server
+    - neutron-agents
     - rabbitmq
   roles:
     - { role: neutron,
