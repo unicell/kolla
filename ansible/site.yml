@@ -87,9 +87,9 @@
         when: enable_nova | bool }
 
 - hosts:
-    - compute
-    - neutron-agents
     - neutron-server
+    - neutron-agents
+    - compute
     - rabbitmq
   roles:
     - { role: neutron,
