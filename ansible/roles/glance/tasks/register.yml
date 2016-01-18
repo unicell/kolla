@@ -17,7 +17,7 @@
   until: glance_endpoint.stdout.split()[2] == 'SUCCESS'
   retries: 10
   delay: 5
-  run_once: True
+  delegate_to: "{{ groups['glance-api'][0] }}"
 
 - name: Creating the Glance project, user, and role
   command: docker exec -t kolla_ansible /usr/bin/ansible localhost
@@ -34,4 +34,4 @@
   until: glance_user.stdout.split()[2] == 'SUCCESS'
   retries: 10
   delay: 5
-  run_once: True
+  delegate_to: "{{ groups['glance-api'][0] }}"

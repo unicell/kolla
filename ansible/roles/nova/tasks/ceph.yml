@@ -29,7 +29,6 @@
   register: cephx_key
   delegate_to: "{{ groups['ceph-mon'][0] }}"
   changed_when: False
-  run_once: True
 
 # TODO(SamYaple): Improve failed_when and changed_when tests
 - name: Pulling cephx keyring for libvirt
@@ -37,7 +36,6 @@
   register: cephx_raw_key
   delegate_to: "{{ groups['ceph-mon'][0] }}"
   changed_when: False
-  run_once: True
 
 - name: Pushing cephx keyring for nova
   copy:

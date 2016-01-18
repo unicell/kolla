@@ -35,7 +35,6 @@
   register: cephx_key_cinder
   delegate_to: "{{ groups['ceph-mon'][0] }}"
   changed_when: False
-  run_once: True
 
 # TODO(SamYaple): Improve changed_when tests
 - name: Pulling cephx keyring for cinder-backup
@@ -43,7 +42,6 @@
   register: cephx_key_cinder_backup
   delegate_to: "{{ groups['ceph-mon'][0] }}"
   changed_when: False
-  run_once: True
 
 - name: Pushing cephx keyring
   copy:

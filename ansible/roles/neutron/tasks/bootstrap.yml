@@ -10,7 +10,6 @@
   changed_when: "{{ database.stdout.find('localhost | SUCCESS => ') != -1 and
                     (database.stdout.split('localhost | SUCCESS => ')[1]|from_json).changed }}"
   failed_when: database.stdout.split()[2] != 'SUCCESS'
-  run_once: True
   delegate_to: "{{ groups['neutron-server'][0] }}"
 
 - name: Reading json from variable
@@ -32,7 +31,6 @@
   changed_when: "{{ database_user_create.stdout.find('localhost | SUCCESS => ') != -1 and
                     (database_user_create.stdout.split('localhost | SUCCESS => ')[1]|from_json).changed }}"
   failed_when: database_user_create.stdout.split()[2] != 'SUCCESS'
-  run_once: True
   delegate_to: "{{ groups['neutron-server'][0] }}"
 
 - name: Running Neutron bootstrap container
@@ -49,6 +47,5 @@
     name: "bootstrap_neutron"
     restart_policy: "never"
     volumes: "{{ node_config_directory }}/neutron-server/:{{ container_config_directory }}/:ro"
-  run_once: True
   delegate_to: "{{ groups['neutron-server'][0] }}"
   when: database_created
