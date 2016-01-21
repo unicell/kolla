@@ -67,6 +67,8 @@ _CLI_OPTS = [
     cfg.BoolOpt('debug', short='d', default=False,
                 deprecated_group='kolla-build',
                 help='Turn on debugging log level'),
+    cfg.IntOpt('depth', default=0, min=0,
+                help='Max backtrace level when building image dependencies'),
     cfg.DictOpt('build-args',
                 help='Set docker build time variables'),
     cfg.StrOpt('include-header', short='i',
