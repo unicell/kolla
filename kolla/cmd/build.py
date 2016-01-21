@@ -473,8 +473,13 @@ class KollaWorker(object):
                     continue
                 if re.search(patterns, image['name']):
                     image['status'] = 'matched'
+                    depth_level = 1
                     while (image['parent'] is not None and
                            image['parent']['status'] != 'matched'):
+                        depth_level += 1
+                        if (self.conf.depth > 0) and \
+                           (depth_level > self.conf.depth):
+                            break
                         image = image['parent']
                         image['status'] = 'matched'
                         LOG.debug('%s:Matched regex', image['name'])
@@ -588,7 +593,8 @@ class KollaWorker(object):
             if image['status'] not in ['matched']:
                 continue
             dot.node(image['name'])
-            if image['parent'] is not None:
+            if (image['parent'] is not None and
+                image['parent']['status'] in ['matched']):
                 dot.edge(image['parent']['name'], image['name'])
 
         with open(to_file, 'w') as f:
