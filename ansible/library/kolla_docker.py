@@ -38,6 +38,7 @@ options:
       - remove_container
       - remove_volume
       - start_container
+      - restart_container
   api_version:
     description:
       - The version of the api for docker-py to use when contacting docker
@@ -150,6 +151,10 @@ EXAMPLES = '''
       kolla_docker:
         name: test_container
         action: remove_container
+    - name: Restart container
+      kolla_docker:
+        name: test_container
+        action: restart_container
     - name: Pull image without starting container
       kolla_docker:
         action: pull_container
@@ -481,6 +486,11 @@ class DockerWorker(object):
             if self.params.get('remove_on_exit'):
                 self.remove_container()
 
+    def restart_container(self):
+        if self.check_container():
+            self.changed = True
+            self.dc.restart(self.params.get('name'))
+
     def create_volume(self):
         if not self.check_volume():
             self.changed = True
@@ -509,7 +519,8 @@ def generate_module():
                                                         'pull_image',
                                                         'remove_container',
                                                         'remove_volume',
-                                                        'start_container']),
+                                                        'start_container',
+                                                        'restart_container']),
         api_version=dict(required=False, type='str', default='auto'),
         auth_email=dict(required=False, type='str'),
         auth_password=dict(required=False, type='str'),
