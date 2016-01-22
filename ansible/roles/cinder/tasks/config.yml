@@ -32,8 +32,15 @@
       - "/etc/kolla/config/cinder.conf"
       - "/etc/kolla/config/cinder/{{ item }}.conf"
     dest: "{{ node_config_directory }}/{{ item }}/cinder.conf"
+  register: cinder_config
+  when: inventory_hostname in groups[item]
+  notify:
+      - restart cinder services
   with_items:
     - "cinder-api"
     - "cinder-backup"
     - "cinder-scheduler"
     - "cinder-volume"
+
+# NOTE(qiuyu): avoid unnecessary restart in initial setup
+- meta: flush_handlers

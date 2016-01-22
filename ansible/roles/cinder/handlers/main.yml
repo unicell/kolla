@@ -1,0 +1,10 @@
+---
+- name: restart cinder services
+  kolla_docker:
+    action: "restart_container"
+    name: "{{ item.2 }}"
+  when: item.0.changed and inventory_hostname in groups[item.1]
+  with_together:
+    - cinder_config.results
+    - ['cinder-api', 'cinder-backup', 'cinder-scheduler', 'cinder-volume']
+    - ['cinder_api', 'cinder_backup', 'cinder_scheduler', 'cinder_volume']
