@@ -61,6 +61,10 @@ nova_compute_ironic_image: "{{ docker_registry ~ '/' if docker_registry else '' 
 nova_compute_ironic_tag: "{{ openstack_release }}"
 nova_compute_ironic_image_full: "{{ nova_compute_ironic_image }}:{{ nova_compute_ironic_tag }}"
 
+nova_rsyncd_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/{{ kolla_base_distro }}-{{ kolla_install_type }}-nova-rsyncd"
+nova_rsyncd_tag: "{{ openstack_release }}"
+nova_rsyncd_image_full: "{{ nova_rsyncd_image }}:{{ nova_rsyncd_tag }}"
+
 ####################
 # Openstack
 ####################

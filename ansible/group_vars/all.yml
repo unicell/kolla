@@ -184,6 +184,8 @@ ironic_keystone_user: "ironic"
 enable_nova_fake: "no"
 num_nova_fake_per_node: 5
 
+enable_nova_migration: "yes"
+
 ####################
 # RabbitMQ options
 ####################

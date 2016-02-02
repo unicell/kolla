@@ -30,6 +30,7 @@
     - "nova-consoleauth"
     - "nova-libvirt"
     - "nova-novncproxy"
+    - "nova-rsyncd"
     - "nova-scheduler"
     - "nova-spicehtml5proxy"
 
@@ -45,6 +46,7 @@
     - "nova-consoleauth"
     - "nova-libvirt"
     - "nova-novncproxy"
+    - "nova-rsyncd"
     - "nova-scheduler"
     - "nova-spicehtml5proxy"
 
@@ -74,3 +76,8 @@
   template:
     src: "{{ role_path }}/templates/libvirtd.conf.j2"
     dest: "{{ node_config_directory }}/nova-libvirt/libvirtd.conf"
+
+- name: Copying over rsyncd.conf
+  template:
+    src: "rsyncd.conf.j2"
+    dest: "{{ node_config_directory }}/nova-rsyncd/rsyncd.conf"

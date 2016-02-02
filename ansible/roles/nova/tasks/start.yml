@@ -134,3 +134,18 @@
   when:
     - inventory_hostname in groups['compute']
     - enable_nova_fake | bool
+
+- name: Starting nova-rsyncd container
+  kolla_docker:
+    action: "start_container"
+    common_options: "{{ docker_common_options }}"
+    image: "{{ nova_rsyncd_image_full }}"
+    name: "nova_rsyncd"
+    volumes:
+      - "{{ node_config_directory }}/nova-rsyncd/:{{ container_config_directory }}/:ro"
+      - "/var/lib/kolla/dev/log:/dev/log"
+      - "nova_compute:/var/lib/nova/"
+      - "nova_libvirt:/var/lib/libvirt"
+  when:
+    - inventory_hostname in groups['compute']
+    - enable_nova_migration | bool

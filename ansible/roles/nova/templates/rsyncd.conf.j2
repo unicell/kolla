@@ -1,0 +1,9 @@
+uid = nova 
+gid = nova
+address = {{ hostvars[inventory_hostname]['ansible_' + api_interface]['ipv4']['address'] }}
+
+[nova]
+max connections = 2
+path = /var/lib/nova
+read only = false
+lock file = /var/lock/nova.lock
